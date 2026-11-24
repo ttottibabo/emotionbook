@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>감정책추천_규칙vsAI비교_v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #E9EEE8; --ink: #1E3530; --muted: #5C6F69; --line: #BFCBC4;
+  --accent: #A8741C; --ai: #4B5FA8; --field: #F6F8F5; --ok: #2F6B4F; --no: #9A3F2E; --warn-bg: #F3E6D0;
+  color-scheme: light; box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14201D; --ink: #DCE6E0; --muted: #93A59E; --line: #2F4440;
+    --accent: #D9A54A; --ai: #9DB0F0; --field: #1B2A26; --ok: #7CC4A0; --no: #E38C78; --warn-bg: #3A2F1C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14201D; --ink: #DCE6E0; --muted: #93A59E; --line: #2F4440;
+  --accent: #D9A54A; --ai: #9DB0F0; --field: #1B2A26; --ok: #7CC4A0; --no: #E38C78; --warn-bg: #3A2F1C; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.6; }
+main { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+h1 { font-family: "Gowun Batang", serif; font-weight: 700; font-size: clamp(1.7rem, 5vw, 2.3rem); line-height: 1.25; margin: 0 0 .4rem; }
+.lede { color: var(--muted); margin: 0 0 1.75rem; }
+
+[role="tablist"] { display: flex; gap: 0; border-bottom: 2px solid var(--line); margin-bottom: 1.75rem; }
+[role="tab"] { font: inherit; cursor: pointer; background: none; border: 0; color: var(--muted);
+  padding: .7rem 1.1rem; margin-bottom: -2px; border-bottom: 3px solid transparent; text-align: left; }
+[role="tab"] small { display: block; font-size: .78rem; }
+[role="tab"][aria-selected="true"] { color: var(--ink); font-weight: 500; border-bottom-color: var(--ink); }
+#tab-ai[aria-selected="true"] { border-bottom-color: var(--ai); }
+[role="tabpanel"][hidden] { display: none; }
+
+form { display: flex; gap: .75rem; flex-wrap: wrap; }
+label.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+input { flex: 1 1 16rem; min-width: 0; font-family: "Gowun Batang", serif; font-size: 1.35rem; color: var(--ink);
+  background: var(--field); border: 0; border-bottom: 2px solid var(--ink); padding: .5rem .75rem; border-radius: 4px 4px 0 0; }
+input::placeholder { color: var(--muted); opacity: .7; }
+input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.go { font: inherit; font-weight: 500; cursor: pointer; background: var(--ink); color: var(--bg); border: 0; padding: .75rem 1.25rem; border-radius: 4px; }
+.go.ai { background: var(--ai); color: #fff; }
+.go:disabled { opacity: .5; cursor: wait; }
+.examples { margin: 1rem 0 0; font-size: .9rem; color: var(--muted); }
+.examples button { font: inherit; cursor: pointer; background: none; border: 0; color: var(--ink); padding: .1rem 0; margin-right: .9rem;
+  text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+
+.out { margin-top: 2.25rem; }
+h2 { font-family: "Gowun Batang", serif; font-size: 1.1rem; margin: 0 0 .7rem; }
+.trace { list-style: none; padding: 0; margin: 0 0 2rem; border-left: 2px solid var(--line); }
+.trace li { padding: .35rem 0 .35rem 1rem; display: grid; grid-template-columns: 7.5rem 1fr; gap: .75rem; font-size: .95rem; }
+.trace .k { color: var(--muted); }
+.trace .v { word-break: break-all; }
+.yes { color: var(--ok); font-weight: 500; } .nope { color: var(--no); font-weight: 500; }
+.trace li.skip { opacity: .4; }
+.ai-trace { border-left-color: var(--ai); }
+.summary { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; margin: 0 0 1.25rem; }
+.summary dt { color: var(--muted); } .summary dd { margin: 0; font-weight: 500; }
+.summary dd.emo { color: var(--accent); }
+#p-ai .summary dd.emo { color: var(--ai); }
+ol.books { list-style: none; padding: 0; margin: 0; }
+ol.books li { padding: 1.1rem 0; border-top: 1px solid var(--line); }
+ol.books li:last-child { border-bottom: 1px solid var(--line); }
+.title { font-family: "Gowun Batang", serif; font-size: 1.3rem; font-weight: 700; margin: 0; }
+.author { color: var(--muted); font-size: .9rem; margin: .1rem 0 .4rem; }
+.why { margin: 0; }
+.tag { font-size: .78rem; color: var(--muted); margin-left: .4rem; font-weight: 400; font-family: "IBM Plex Sans KR", sans-serif; }
+.notice { background: var(--warn-bg); padding: 1rem 1.25rem; border-radius: 4px; }
+.notice p { margin: 0 0 .5rem; } .notice p:last-child { margin: 0; }
+.list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.list button { font: inherit; cursor: pointer; background: var(--field); color: var(--ink); border: 1px solid var(--line); padding: .25rem .8rem; border-radius: 999px; }
+.compare { margin-top: 1.5rem; padding: .9rem 1.1rem; border: 1px dashed var(--line); border-radius: 6px; font-size: .92rem; }
+.compare p { margin: 0; }
+.thinking { color: var(--muted); }
+.thinking::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@media (prefers-reduced-motion: reduce) { .thinking::after { animation: none; content: "..."; } }
+footer { margin-top: 3rem; font-size: .8rem; color: var(--muted); }
+@media (max-width: 30rem) { .trace li { grid-template-columns: 1fr; gap: 0; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>같은 문장, 두 가지 방식</h1>
+  <p class="lede">탭 1은 단어장에서 글자를 찾고, 탭 2는 AI가 문장의 뜻을 읽습니다. 같은 문장을 넣어 차이를 비교해 보세요.</p>
+
+  <div role="tablist" aria-label="추천 방식">
+    <button role="tab" id="tab-rule" aria-controls="p-rule" aria-selected="true">탭 1 · 규칙<small>단어장 매칭</small></button>
+    <button role="tab" id="tab-ai" aria-controls="p-ai" aria-selected="false" tabindex="-1">탭 2 · AI<small>문장 이해</small></button>
+  </div>
+
+  <section role="tabpanel" id="p-rule" aria-labelledby="tab-rule">
+    <form id="f-rule" autocomplete="off">
+      <label class="sr" for="q-rule">지금 마음 (규칙)</label>
+      <input id="q-rule" placeholder="예: 발표 앞두고 불안해" maxlength="120">
+      <button class="go" type="submit">책 찾기</button>
+    </form>
+    <p class="examples" data-target="rule">비교용 예시: </p>
+    <div class="out" id="out-rule" aria-live="polite"></div>
+  </section>
+
+  <section role="tabpanel" id="p-ai" aria-labelledby="tab-ai" hidden>
+    <form id="f-ai" autocomplete="off">
+      <label class="sr" for="q-ai">지금 마음 (AI)</label>
+      <input id="q-ai" placeholder="예: 발표 앞두고 불안해" maxlength="300">
+      <button class="go ai" id="go-ai" type="submit">AI에게 묻기</button>
+    </form>
+    <p class="examples" data-target="ai">비교용 예시: </p>
+    <div class="out" id="out-ai" aria-live="polite"></div>
+  </section>
+
+  <footer>프로토타입 v4 · 2026-11-11 KST · 두 탭 모두 같은 책 36권 안에서만 고릅니다. 탭 2는 처음 쓸 때 Claude 사용 허락을 묻고, 사용자 본인의 Claude 사용량을 씁니다.</footer>
+</main>
+
+<script>
+const DICT = [
+  { key: "슬픔", words: ["슬픔","슬퍼","슬프","우울","눈물","상실","허무"], books: [
+    ["죽음의 수용소에서","빅터 프랭클","가장 어두운 순간에도 삶의 의미를 붙잡을 수 있다는 기록입니다."],
+    ["어린 왕자","앙투안 드 생텍쥐페리","잃어버린 것과 소중한 것을 다시 보게 합니다."],
+    ["아몬드","손원평","감정을 잘 느끼지 못하는 소년이 타인과 연결되어 가는 이야기입니다."]]},
+  { key: "불안", words: ["불안","걱정","초조","긴장","막막","떨려","떨리"], books: [
+    ["불안","알랭 드 보통","불안이 어디서 오는지 철학·예술·종교로 차분히 풀어냅니다."],
+    ["미움받을 용기","기시미 이치로·고가 후미타케","남의 시선에서 오는 불안을 대화 형식으로 덜어 줍니다."],
+    ["월든","헨리 데이비드 소로","속도를 늦추고 단순하게 사는 법을 보여 줍니다."]]},
+  { key: "외로움", words: ["외로","고독","쓸쓸","혼자"], books: [
+    ["불편한 편의점","김호연","낯선 사람들이 서로에게 기대는 따뜻한 동네 이야기입니다."],
+    ["쇼코의 미소","최은영","관계의 미묘한 온도를 섬세하게 그린 단편집입니다."],
+    ["달러구트 꿈 백화점","이미예","잠들기 전 가볍게 위로받기 좋은 판타지 소설입니다."]]},
+  { key: "분노", words: ["분노","화나","화가","짜증","억울","열받"], books: [
+    ["화","틱낫한","화를 누르지 않고 돌보는 방법을 알려 줍니다."],
+    ["비폭력대화","마셜 B. 로젠버그","화난 상황을 말로 풀어내는 구체적인 틀을 줍니다."],
+    ["자기 앞의 생","에밀 아자르","거친 세상 속에서도 사랑을 지키는 소년의 이야기입니다."]]},
+  { key: "무기력", words: ["무기력","귀찮","의욕","게으","멍하"], books: [
+    ["아주 작은 습관의 힘","제임스 클리어","아주 작은 행동 하나부터 다시 움직이게 합니다."],
+    ["노인과 바다","어니스트 헤밍웨이","짧고 단단한 문장으로 버티는 힘을 보여 줍니다."],
+    ["데미안","헤르만 헤세","나를 다시 찾아가는 성장의 고전입니다."]]},
+  { key: "지침", words: ["지침","지쳐","지친","피곤","번아웃","힘들","힘듦"], books: [
+    ["여행의 이유","김영하","떠남과 쉼에 대해 가볍게 생각해 보게 하는 산문입니다."],
+    ["숨결이 바람 될 때","폴 칼라니티","무엇을 위해 일하고 사는지 다시 묻게 합니다."],
+    ["월든","헨리 데이비드 소로","일과 소비에서 한 발 물러나는 시간을 줍니다."]]},
+  { key: "행복", words: ["행복","기쁨","기뻐","즐거","신나"], books: [
+    ["꾸뻬 씨의 행복 여행","프랑수아 를로르","행복에 대한 짧은 깨달음을 여행기처럼 모았습니다."],
+    ["행복의 기원","서은국","행복을 심리학과 진화의 관점에서 쉽게 설명합니다."],
+    ["빨간 머리 앤","루시 모드 몽고메리","일상의 기쁨을 크게 느끼는 법을 떠올리게 합니다."]]},
+  { key: "설렘", words: ["설렘","설레","사랑","연애","두근"], books: [
+    ["오만과 편견","제인 오스틴","오해와 자존심을 넘어서는 고전 연애 소설입니다."],
+    ["사랑의 기술","에리히 프롬","사랑을 감정이 아닌 연습하는 능력으로 봅니다."],
+    ["냉정과 열정 사이","에쿠니 가오리·쓰지 히토나리","두 작가가 남녀의 시점을 나눠 쓴 사랑 이야기입니다."]]},
+  { key: "그리움", words: ["그리움","그리워","보고싶","향수","추억"], books: [
+    ["나의 라임 오렌지나무","J.M. 바스콘셀로스","어린 시절의 기억과 애틋함을 불러옵니다."],
+    ["엄마를 부탁해","신경숙","가까운 사람을 뒤늦게 이해하게 되는 이야기입니다."],
+    ["연을 쫓는 아이","할레드 호세이니","오래된 우정과 속죄를 다룬 소설입니다."]]},
+  { key: "후회", words: ["후회","미련","자책","아쉬"], books: [
+    ["미드나잇 라이브러리","매트 헤이그","‘다른 선택을 했다면’이라는 질문을 끝까지 따라갑니다."],
+    ["남아 있는 나날","가즈오 이시구로","지나간 선택을 돌아보는 집사의 조용한 여정입니다."],
+    ["위대한 개츠비","F. 스콧 피츠제럴드","되돌릴 수 없는 과거를 붙잡으려는 사람의 이야기입니다."]]},
+  { key: "열등감", words: ["열등","질투","부러","비교","자존감"], books: [
+    ["자존감 수업","윤홍균","남과 비교하는 습관을 실용적으로 다룹니다."],
+    ["미움받을 용기","기시미 이치로·고가 후미타케","인정받으려는 마음에서 벗어나는 법을 다룹니다."],
+    ["호밀밭의 파수꾼","J.D. 샐린저","어디에도 맞지 않는다고 느끼는 마음을 그립니다."]]},
+  { key: "두려움", words: ["두려","무서","겁나","겁이","망설"], books: [
+    ["연금술사","파울로 코엘료","두려움을 지나 자기 길을 찾아가는 우화입니다."],
+    ["갈매기의 꿈","리처드 바크","남들과 다른 길을 가는 용기를 짧게 담았습니다."],
+    ["모모","미하엘 엔데","쫓기는 마음 대신 내 시간을 되찾는 이야기입니다."]]}
+];
+
+const CRISIS = ["죽고","죽을래","자살","자해","사라지고싶","끝내고싶"];
+const EXAMPLES = ["발표 앞두고 불안해","이제 불안하지 않아","팀장한테 깨져서 하루 종일 멍해","시험 망쳐서 엄마한테 미안해","오늘 날씨 맑음"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+// 책 36권에 번호 붙이기 (AI가 번호로 고르게)
+const CATALOG = [];
+DICT.forEach(d => d.books.forEach(b => CATALOG.push({ id: CATALOG.length + 1, emo: d.key, title: b[0], author: b[1], why: b[2] })));
+
+const crisisBox = `<div class="notice">
+  <p>많이 힘든 마음이 느껴집니다. 지금은 책보다 사람과 이야기하는 게 먼저입니다.</p>
+  <p>한국에서는 자살예방 상담전화 <strong>109</strong>로 24시간 연락할 수 있습니다. 믿을 수 있는 사람에게 지금 연락해 보는 것도 좋습니다.</p></div>`;
+
+const bookList = items => `<ol class="books">${items.map(b => `<li>
+  <p class="title">${esc(b.title)}${b.tag ? `<span class="tag">${esc(b.tag)}</span>` : ""}</p>
+  <p class="author">${esc(b.author)}</p><p class="why">${esc(b.why)}</p></li>`).join("")}</ol>`;
+
+/* ---------- 탭 1: 규칙 ---------- */
+function ruleMatch(input) {
+  const compact = input.replace(/\s+/g, "");
+  if (CRISIS.some(w => compact.includes(w))) return { compact, crisis: true };
+  for (const d of DICT) {
+    const w = d.words.find(x => compact.includes(x));
+    if (w) return { compact, hit: d, word: w };
+  }
+  return { compact, hit: null };
+}
+
+function runRule(raw) {
+  const out = $("out-rule"), input = raw.trim();
+  if (!input) { out.innerHTML = ""; return; }
+  const r = ruleMatch(input);
+  if (r.crisis) { out.innerHTML = crisisBox; return; }
+  const { hit, word, compact } = r;
+  const s3 = hit ? `${hit.key} 칸 → “${esc(word)}” 포함? → <span class="yes">예 ✅</span>`
+                 : `${DICT.length}개 칸 모두 확인 → <span class="nope">해당 단어 없음 ❌</span>`;
+  let html = `<h2>처리 과정</h2><ol class="trace">
+    <li><span class="k">① 입력 받기</span><span class="v">“${esc(input)}”</span></li>
+    <li><span class="k">② 빈칸 지우기</span><span class="v">“${esc(compact)}”</span></li>
+    <li><span class="k">③ 단어장 찾기</span><span class="v">${s3}</span></li>
+    <li class="${hit ? "" : "skip"}"><span class="k">④ 결과 출력</span><span class="v">${hit ? `감정: ${hit.key} / 인식한 단어: “${esc(word)}” / 책 3권` : "건너뜀"}</span></li>
+    <li class="${hit ? "skip" : ""}"><span class="k">⑤ 못 찾으면</span><span class="v">${hit ? "해당 없음" : "“사전에 없음” + 감정 목록 안내"}</span></li></ol>`;
+  if (hit) {
+    html += `<h2>추천 결과</h2><dl class="summary"><dt>감정</dt><dd class="emo">${hit.key}</dd><dt>인식한 단어</dt><dd>“${esc(word)}”</dd></dl>`
+         + bookList(hit.books.map(([title, author, why]) => ({ title, author, why })));
+  } else {
+    html += `<div class="notice"><p><strong>사전에 없음</strong> · “${esc(input)}”에서 감정 단어를 찾지 못했습니다.</p>
+      <p>지금 알아들을 수 있는 감정은 아래 ${DICT.length}가지입니다.</p>
+      <div class="list">${DICT.map(d => `<button type="button" data-k="${d.key}">${d.key}</button>`).join("")}</div></div>`;
+  }
+  html += `<div class="compare"><p>같은 문장을 AI는 어떻게 읽을까요? <button type="button" class="go ai" id="to-ai" style="padding:.35rem .8rem;margin-left:.4rem">탭 2에서 보기</button></p></div>`;
+  out.innerHTML = html;
+  out.querySelectorAll("[data-k]").forEach(b => b.addEventListener("click", () => { $("q-rule").value = b.dataset.k; runRule(b.dataset.k); }));
+  $("to-ai").addEventListener("click", () => { $("q-ai").value = input; selectTab("ai"); runAI(input); });
+}
+
+/* ---------- 탭 2: AI ---------- */
+let samplePromise = null;
+function getSample() {
+  if (!samplePromise) samplePromise = (window.claude && window.claude.use) ? window.claude.use("sample") : Promise.resolve(null);
+  return samplePromise;
+}
+
+function buildPrompt(input) {
+  const emos = DICT.map(d => d.key).join(", ");
+  const cat = CATALOG.map(b => `${b.id}. ${b.title} / ${b.author} / 원래 분류: ${b.emo}`).join("\n");
+  return `너는 한국어 감정 분석과 책 추천 도우미다. 아래 사용자 문장의 감정을 읽고, 책 목록 안에서만 3권을 골라라.
+
+[사용자 문장]
+${input}
+
+[감정 목록] ${emos}
+
+[책 목록]
+${cat}
+
+규칙:
+- 문장 전체의 뜻을 읽어라. 부정문("~하지 않아"), 상황만 말한 문장("팀장한테 깨졌어")도 숨은 감정을 추론하라.
+- primary는 감정 목록 중 하나. 정말 감정이 없으면 null.
+- secondary는 두 번째로 강한 감정(감정 목록 중 하나) 또는 null.
+- intensity는 1~5 정수.
+- evidence는 판단 근거가 된 문장 속 표현(원문 그대로, 짧게).
+- reading은 문장을 어떻게 이해했는지 한 문장 설명.
+- books는 책 목록 번호 3개. 원래 분류와 달라도 이 사람 상황에 더 맞으면 골라도 된다.
+- 각 책의 why는 이 사람 문장에 맞춘 한 문장 추천 이유.
+- 자해·자살 의도가 보이면 crisis를 true로.
+- 목록에 없는 책은 절대 만들지 마라.
+
+JSON만 출력하라. 다른 글, 코드 블록 표시 없이:
+{"crisis":false,"primary":"불안","secondary":null,"intensity":3,"evidence":"...","reading":"...","books":[{"id":4,"why":"..."},{"id":5,"why":"..."},{"id":6,"why":"..."}]}`;
+}
+
+function errCopy(code) {
+  if (code === "not_granted") return "Claude 사용을 허락하지 않아 AI 탭을 쓸 수 없습니다. 탭 1의 규칙 방식은 그대로 쓸 수 있어요.";
+  if (code === "rate_limited") return "요청이 많아 잠시 막혔습니다. 1분 정도 뒤에 다시 눌러 주세요.";
+  return "AI 응답을 받지 못했습니다. 잠시 뒤 다시 눌러 주세요.";
+}
+
+let busy = false;
+async function runAI(raw) {
+  const out = $("out-ai"), btn = $("go-ai"), input = raw.trim();
+  if (!input || busy) { if (!input) out.innerHTML = ""; return; }
+
+  // 위기 표현은 AI 호출 전에 먼저 거른다 (안전장치는 규칙으로 유지)
+  if (CRISIS.some(w => input.replace(/\s+/g, "").includes(w))) { out.innerHTML = crisisBox; return; }
+
+  const sample = await getSample();
+  if (!sample) {
+    out.innerHTML = `<div class="notice"><p>이 화면에서는 AI를 부를 수 없습니다. claude.ai에서 이 페이지를 열면 탭 2가 동작합니다.</p></div>`;
+    return;
+  }
+
+  busy = true; btn.disabled = true;
+  out.innerHTML = `<p class="thinking">AI가 문장을 읽는 중</p>`;
+  const t0 = performance.now();
+  let data;
+  try {
+    data = await sample.json(buildPrompt(input), { modelTier: "quick" });
+  } catch (e) {
+    out.innerHTML = `<div class="notice"><p>${errCopy(e && e.code)}</p></div>`;
+    busy = false; btn.disabled = false; return;
+  }
+  const sec = ((performance.now() - t0) / 1000).toFixed(1);
+  busy = false; btn.disabled = false;
+
+  if (!data || typeof data !== "object") { out.innerHTML = `<div class="notice"><p>AI 응답 형식이 맞지 않습니다. 다시 눌러 주세요.</p></div>`; return; }
+  if (data.crisis) { out.innerHTML = crisisBox; return; }
+
+  const keys = DICT.map(d => d.key);
+  const primary = keys.includes(data.primary) ? data.primary : null;
+  const secondary = keys.includes(data.secondary) && data.secondary !== primary ? data.secondary : null;
+  const intensity = Math.min(5, Math.max(1, parseInt(data.intensity, 10) || 0)) || null;
+
+  // AI가 고른 책 번호 검증: 목록에 있는 것만, 중복 없이
+  const seen = new Set();
+  let picks = (Array.isArray(data.books) ? data.books : [])
+    .map(b => ({ book: CATALOG.find(c => c.id === Number(b && b.id)), why: b && b.why }))
+    .filter(p => p.book && !seen.has(p.book.id) && seen.add(p.book.id))
+    .slice(0, 3);
+  let fallback = false;
+  if (picks.length < 3 && primary) {
+    CATALOG.filter(c => c.emo === primary && !seen.has(c.id)).forEach(c => { if (picks.length < 3) { picks.push({ book: c, why: c.why }); seen.add(c.id); fallback = true; } });
+  }
+
+  const rule = ruleMatch(input);
+  let html = `<h2>처리 과정</h2><ol class="trace ai-trace">
+    <li><span class="k">① 입력 받기</span><span class="v">“${esc(input)}”</span></li>
+    <li><span class="k">② AI에게 전달</span><span class="v">문장 + 감정 ${keys.length}개 + 책 ${CATALOG.length}권 목록 (응답 ${sec}초)</span></li>
+    <li><span class="k">③ 뜻 읽기</span><span class="v">${primary ? `<span class="yes">${primary}</span>${secondary ? ` + ${secondary}` : ""}${intensity ? ` · 강도 ${intensity}/5` : ""}` : `<span class="nope">감정을 찾지 못함</span>`}</span></li>
+    <li><span class="k">④ 근거</span><span class="v">${data.evidence ? `“${esc(data.evidence)}”` : "없음"}</span></li>
+    <li class="${picks.length ? "" : "skip"}"><span class="k">⑤ 책 고르기</span><span class="v">${picks.length ? `36권 중 ${picks.length}권 선택${fallback ? " (일부는 기본 추천으로 보충)" : ""}` : "건너뜀"}</span></li></ol>`;
+
+  if (primary && picks.length) {
+    html += `<h2>추천 결과</h2><dl class="summary">
+      <dt>감정</dt><dd class="emo">${primary}${secondary ? ` + ${secondary}` : ""}</dd>
+      <dt>AI의 이해</dt><dd style="font-weight:400">${esc(data.reading || "")}</dd></dl>`
+      + bookList(picks.map(p => ({ title: p.book.title, author: p.book.author, why: p.why || p.book.why, tag: p.book.emo !== primary ? `원래 ${p.book.emo} 칸` : "" })));
+  } else {
+    html += `<div class="notice"><p><strong>감정을 읽지 못함</strong> · ${esc(data.reading || "문장에서 뚜렷한 감정을 찾지 못했습니다.")}</p>
+      <p>요즘 기분이 어떤지 한 문장 더 덧붙여 주세요.</p></div>`;
+  }
+
+  const ruleTxt = rule.crisis ? "위기 안내" : rule.hit ? `${rule.hit.key} (단어 “${esc(rule.word)}”)` : "사전에 없음";
+  const same = rule.hit && primary === rule.hit.key;
+  html += `<div class="compare"><p>같은 문장, 탭 1 규칙 결과: <strong>${ruleTxt}</strong> · ${same ? "두 방식의 감정 판단이 같습니다." : "두 방식의 판단이 다릅니다."}</p></div>`;
+  out.innerHTML = html;
+}
+
+/* ---------- 탭 전환 ---------- */
+function selectTab(name) {
+  ["rule", "ai"].forEach(n => {
+    const on = n === name;
+    $("tab-" + n).setAttribute("aria-selected", String(on));
+    $("tab-" + n).tabIndex = on ? 0 : -1;
+    $("p-" + n).hidden = !on;
+  });
+  if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+}
+["rule", "ai"].forEach(n => $("tab-" + n).addEventListener("click", () => {
+  const other = n === "ai" ? "rule" : "ai";
+  if (!$("q-" + n).value && $("q-" + other).value) $("q-" + n).value = $("q-" + other).value;
+  selectTab(n);
+}));
+document.querySelector('[role="tablist"]').addEventListener("keydown", e => {
+  if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  const next = $("tab-rule").getAttribute("aria-selected") === "true" ? "ai" : "rule";
+  selectTab(next); $("tab-" + next).focus();
+});
+const fromHash = () => selectTab(location.hash === "#ai" ? "ai" : "rule");
+window.addEventListener("hashchange", fromHash);
+fromHash();
+
+$("f-rule").addEventListener("submit", e => { e.preventDefault(); runRule($("q-rule").value); });
+$("f-ai").addEventListener("submit", e => { e.preventDefault(); runAI($("q-ai").value); });
+document.querySelectorAll(".examples").forEach(p => {
+  const t = p.dataset.target;
+  EXAMPLES.forEach(s => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = s;
+    b.addEventListener("click", () => { $("q-" + t).value = s; t === "ai" ? runAI(s) : runRule(s); });
+    p.appendChild(b);
+  });
+});
+getSample();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>감정책 화면 테스트</title>
+<style>body{font:14px/1.6 "Malgun Gothic",sans-serif;margin:1.5rem;background:#fff;color:#111}.pass{color:#1a7f37}.fail{color:#c0392b;font-weight:bold}iframe{width:420px;height:700px;border:1px solid #ccc}</style></head>
+<body>
+<h1 style="font-size:1.2rem">감정책 화면 테스트 (index.html을 실제로 조작)</h1>
+<pre id="result">실행 중…</pre>
+<iframe id="app" src="../index.html"></iframe>
+<script>
+const rows = []; let pass = 0, fail = 0;
+const check = (id, name, ok, detail = "") => { ok ? pass++ : fail++; rows.push(`<span class="${ok ? "pass" : "fail"}">${ok ? "PASS" : "FAIL"}</span> ${id} ${name}${ok ? "" : " → " + detail}`); };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+document.getElementById("app").addEventListener("load", async () => {
+  const w = document.getElementById("app").contentWindow, d = w.document;
+  await wait(800);
+  const submit = async text => { d.getElementById("q").value = text; d.getElementById("f").requestSubmit(); await wait(200); return d.getElementById("out"); };
+
+  check("U1", "예시 버튼 4개가 표시됨", d.querySelectorAll("#examples button").length === 4, d.querySelectorAll("#examples button").length);
+
+  let out = await submit("발표 앞두고 불안해");
+  check("U2", "문장 입력 → 감정 ‘불안’과 책 3권", out.querySelector(".emo")?.textContent === "불안" && out.querySelectorAll("ol.books li").length === 3, out.textContent.slice(0, 60));
+  check("U3", "설명 문구의 조사가 맞음 (“불안”을 … 불안으로)", /“불안”을 찾아 불안으로 읽었습니다/.test(out.querySelector(".how p")?.textContent || ""), out.querySelector(".how p")?.textContent);
+
+  out.querySelector('[data-vote="up"]').click(); await wait(100);
+  check("U4", "👍 누르면 두 버튼이 잠기고 감사 문구 표시", [...out.querySelectorAll("[data-vote]")].every(b => b.disabled) && d.getElementById("toast").textContent.includes("고마워요"));
+
+  out = await submit("진짜 화났어");
+  check("U5", "‘분노’ 설명 조사 (분노로)", /분노로 읽었습니다/.test(out.querySelector(".how p")?.textContent || ""), out.querySelector(".how p")?.textContent);
+
+  out = await submit("오늘 날씨 맑음");
+  const chips = out.querySelectorAll("[data-k]");
+  check("U6", "감정 못 찾으면 감정 12개 버튼 안내", chips.length === 12, chips.length);
+  chips[4].click(); await wait(100);
+  check("U7", "감정 버튼 선택 → 그 감정의 책 3권", d.querySelectorAll("#out ol.books li").length === 3 && /직접 골랐습니다/.test(d.querySelector("#out .how p").textContent));
+
+  out = await submit("다 끝내고 싶다");
+  check("U8", "위기 표현 → 책 대신 109 안내, 추천 없음", out.querySelector(".crisis") && out.textContent.includes("109") && !out.querySelector("ol.books"));
+
+  out = await submit("   ");
+  check("U9", "빈 입력은 아무것도 표시하지 않음", out.innerHTML === "");
+
+  out = await submit('<img src=x onerror="window.__xss=1">불안');
+  check("U10", "입력에 HTML을 넣어도 실행되지 않음", !w.__xss && !out.querySelector("img"));
+
+  rows.push("", `합계: 통과 ${pass} · 실패 ${fail}`);
+  const el = document.getElementById("result"); el.innerHTML = rows.join("\n"); el.dataset.done = fail ? "fail" : "ok";
+});
+</script>
+</body>
+</html>

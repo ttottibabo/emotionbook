@@ -1,0 +1,50 @@
+rules_version = '2';
+
+// 감정책 Firestore 보안 규칙
+// - 누구나: 정해진 형태의 익명 기록(events)과 피드백(feedback)을 "추가"만 할 수 있다.
+// - 운영자(admins/{uid} 문서가 있는 로그인 사용자)만: 기록을 "읽을" 수 있다.
+// - 누구도: 기록을 고치거나 지울 수 없다. 운영자 지정은 Firebase 콘솔에서만 한다.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function shortOrNull(v, n) { return v == null || (v is string && v.size() <= n); }
+    function validSid(d) { return d.sid is string && d.sid.size() <= 20; }
+
+    match /events/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['type', 'emotion', 'word', 'source', 'sid', 'ts'])
+        && request.resource.data.keys().hasAll(['type', 'emotion', 'word', 'source', 'sid', 'ts'])
+        && request.resource.data.type in ['recommend', 'miss', 'crisis', 'share']
+        && shortOrNull(request.resource.data.emotion, 10)
+        && shortOrNull(request.resource.data.word, 10)
+        && (request.resource.data.source == null || request.resource.data.source in ['input', 'chip', 'link'])
+        && validSid(request.resource.data)
+        && request.resource.data.ts == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /feedback/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['emotion', 'vote', 'sid', 'ts'])
+        && request.resource.data.keys().hasAll(['emotion', 'vote', 'sid', 'ts'])
+        && request.resource.data.emotion is string && request.resource.data.emotion.size() <= 10
+        && request.resource.data.vote in ['up', 'down']
+        && validSid(request.resource.data)
+        && request.resource.data.ts == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

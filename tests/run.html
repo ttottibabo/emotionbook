@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>감정책 테스트</title>
+<style>body{font:14px/1.6 "Malgun Gothic",sans-serif;margin:1.5rem;background:#fff;color:#111}.pass{color:#1a7f37}.fail{color:#c0392b;font-weight:bold}.known{color:#9a6700}h1{font-size:1.2rem}</style></head>
+<body>
+<h1>감정책 자동 테스트</h1>
+<pre id="result">실행 중…</pre>
+<script type="module">
+import { DICT, CRISIS } from "../js/data.js";
+import { ruleMatch, byEmotion, EMOTIONS } from "../js/recommend.js";
+import { summarize } from "../js/admin.js";
+
+const rows = [];
+let pass = 0, fail = 0, known = 0;
+function check(id, name, ok, detail = "", isKnown = false) {
+  if (ok) { pass++; rows.push(`<span class="pass">PASS</span> ${id} ${name}`); }
+  else if (isKnown) { known++; rows.push(`<span class="known">KNOWN</span> ${id} ${name} → ${detail}`); }
+  else { fail++; rows.push(`<span class="fail">FAIL</span> ${id} ${name} → ${detail}`); }
+}
+const emo = t => { const r = ruleMatch(t); return r.crisis ? "위기" : r.empty ? "빈칸" : r.hit ? r.hit.key : "없음"; };
+
+// 1. 데이터 무결성
+check("D1", "감정은 12가지", DICT.length === 12, DICT.length);
+check("D2", "감정마다 책 3권, 제목·저자·이유가 모두 있음", DICT.every(d => d.books.length === 3 && d.books.every(b => b.length === 3 && b.every(x => x && x.trim()))));
+const allWords = DICT.flatMap(d => d.words);
+check("D3", "한 단어가 두 감정에 동시에 들어 있지 않음", new Set(allWords).size === allWords.length);
+check("D4", "모든 감정을 이름으로 찾을 수 있음", EMOTIONS.every(k => byEmotion(k)));
+
+// 2. 감정 인식
+const cases = [
+  ["R1", "발표 앞두고 불안해", "불안"], ["R2", "요즘 너무 지쳤어", "지침"], ["R3", "혼자인 것 같아 쓸쓸해", "외로움"],
+  ["R4", "시험 망쳐서 후회돼", "후회"], ["R5", "너무 행복한 하루", "행복"], ["R6", "팀장 때문에 화가 나", "분노"],
+  ["R7", "할머니가 보고싶다", "그리움"], ["R8", "친구가 부러워", "열등감"], ["R9", "무서워서 못 하겠어", "두려움"],
+  ["R10", "고백 받아서 설레", "설렘"], ["R11", "아무것도 귀찮아", "무기력"], ["R12", "눈물이 나", "슬픔"],
+  ["R13", "불 안 해", "불안"], ["R14", "오늘 날씨 맑음", "없음"], ["R15", "   ", "빈칸"],
+  ["R16", "죽을 만큼 행복해", "행복"], ["R17", "어제 너무 슬펐어", "슬픔"], ["R18", "진짜 화났어", "분노"],
+  ["R19", "하루 종일 멍해", "무기력"], ["R20", "합격해서 기뻤다", "행복"], ["R21", "그 사람이 그리웠어", "그리움"], ["R22", "첫 출근이라 떨렸어", "불안"]
+];
+cases.forEach(([id, t, want]) => check(id, `“${t}” → ${want}`, emo(t) === want, emo(t)));
+
+// 3. 위기 표현: 추천보다 먼저
+[["C1", "죽고 싶어"], ["C2", "자 해 하고 싶다"], ["C3", "불안해서 사라지고 싶어"], ["C4", "다 끝내고 싶다"]]
+  .forEach(([id, t]) => check(id, `“${t}” → 위기 안내`, emo(t) === "위기", emo(t)));
+
+// 4. 알려진 한계 (규칙 방식은 뜻을 읽지 못함) — 실패해도 빌드를 막지 않음
+check("K1", "“이제 불안하지 않아” → 없음 (부정문)", emo("이제 불안하지 않아") === "없음", emo("이제 불안하지 않아"), true);
+check("K2", "“팀장한테 깨졌어” → 분노·슬픔 등 (상황만 말한 문장)", emo("팀장한테 깨졌어") !== "없음", emo("팀장한테 깨졌어"), true);
+check("K3", "“시험 망쳐서 엄마한테 미안해” → 후회 (사전에 없는 표현)", emo("시험 망쳐서 엄마한테 미안해") === "후회", emo("시험 망쳐서 엄마한테 미안해"), true);
+
+// 5. 운영 지표 집계
+const now = Date.UTC(2026, 10, 24, 12);
+const ev = [
+  { type: "recommend", emotion: "불안", source: "input", sid: "a", ts: now - 1000 },
+  { type: "recommend", emotion: "불안", source: "link", sid: "b", ts: now - 2000 },
+  { type: "recommend", emotion: "지침", source: "chip", sid: "b", ts: now - 3000 },
+  { type: "miss", sid: "c", ts: now - 4000 },
+  { type: "crisis", sid: "d", ts: now - 5000 },
+  { type: "share", emotion: "불안", sid: "a", ts: now - 6000 },
+  { type: "recommend", emotion: "행복", source: "input", sid: "e", ts: now - 40 * 86400000 }
+];
+const fb = [{ emotion: "불안", vote: "up", ts: now - 1000 }, { emotion: "불안", vote: "down", ts: now - 1000 }, { emotion: "지침", vote: "up", ts: now - 1000 }];
+const s = summarize(ev, fb, 30, now);
+check("S1", "30일 밖 기록은 빠짐 (추천 3건)", s.rec === 3, s.rec);
+check("S2", "미인식·위기·공유 건수", s.miss === 1 && s.crisis === 1 && s.shares === 1, JSON.stringify([s.miss, s.crisis, s.shares]));
+check("S3", "방문 수는 sid 기준 중복 제거 (4)", s.visitors === 4, s.visitors);
+check("S4", "감정별 집계: 불안 2건, 👍1 👎1", (x => x.n === 2 && x.up === 1 && x.down === 1 && x.shares === 1)(s.byEmo.find(e => e.key === "불안")));
+check("S5", "경로별 집계: 입력1 · 선택1 · 링크1", s.bySource.map(x => x.n).join() === "1,1,1", s.bySource.map(x => x.n).join());
+
+rows.push("", `합계: 통과 ${pass} · 실패 ${fail} · 알려진 한계 ${known}`);
+const el = document.getElementById("result");
+el.innerHTML = rows.join("\n");
+el.dataset.done = fail === 0 ? "ok" : "fail";
+</script>
+</body>
+</html>

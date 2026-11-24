@@ -1,0 +1,87 @@
+/* 감정책 공통 스타일 (index.html, admin.html) */
+:root {
+  --bg: #E9EEE8; --ink: #1E3530; --muted: #5C6F69; --line: #BFCBC4;
+  --accent: #A8741C; --field: #F6F8F5; --ok: #2F6B4F; --no: #9A3F2E; --warn-bg: #F3E6D0;
+  color-scheme: light; box-sizing: border-box;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14201D; --ink: #DCE6E0; --muted: #93A59E; --line: #2F4440;
+    --accent: #D9A54A; --field: #1B2A26; --ok: #7CC4A0; --no: #E38C78; --warn-bg: #3A2F1C; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14201D; --ink: #DCE6E0; --muted: #93A59E; --line: #2F4440;
+  --accent: #D9A54A; --field: #1B2A26; --ok: #7CC4A0; --no: #E38C78; --warn-bg: #3A2F1C; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere;
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+main { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1rem 4rem; }
+h1 { font-family: "Gowun Batang", serif; font-weight: 700; font-size: clamp(1.7rem, 5vw, 2.3rem); line-height: 1.25; margin: 0 0 .4rem; }
+h2 { font-family: "Gowun Batang", serif; font-size: 1.2rem; margin: 0 0 .7rem; }
+.lede { color: var(--muted); margin: 0 0 1.75rem; }
+a { color: inherit; }
+
+form { display: flex; gap: .75rem; flex-wrap: wrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+input { flex: 1 1 16rem; min-width: 0; font-family: "Gowun Batang", serif; font-size: 1.35rem; color: var(--ink);
+  background: var(--field); border: 0; border-bottom: 2px solid var(--ink); padding: .5rem .75rem; border-radius: 4px 4px 0 0; }
+input::placeholder { color: var(--muted); opacity: .7; }
+input:focus-visible, button:focus-visible, summary:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.go { font: inherit; font-weight: 500; cursor: pointer; background: var(--ink); color: var(--bg); border: 0; padding: .75rem 1.25rem; border-radius: 4px; }
+.go:disabled { opacity: .5; cursor: wait; }
+.examples { margin: 1rem 0 0; font-size: .9rem; color: var(--muted); }
+.examples button { font: inherit; cursor: pointer; background: none; border: 0; color: var(--ink); padding: .1rem 0; margin-right: .9rem;
+  text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; }
+
+.out { margin-top: 2.25rem; }
+.emo { color: var(--accent); }
+ol.books { list-style: none; padding: 0; margin: 0; }
+ol.books li { padding: 1.1rem 0; border-top: 1px solid var(--line); }
+ol.books li:last-child { border-bottom: 1px solid var(--line); }
+.title { font-family: "Gowun Batang", serif; font-size: 1.3rem; font-weight: 700; margin: 0; }
+.author { color: var(--muted); font-size: .9rem; margin: .1rem 0 .4rem; }
+.why { margin: 0; }
+.how { margin: 1rem 0 0; font-size: .92rem; color: var(--muted); }
+.how summary { cursor: pointer; }
+.how p { margin: .5rem 0 0; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; margin-top: 1.5rem; }
+.feedback { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; font-size: .92rem; }
+.feedback button { font: inherit; cursor: pointer; background: var(--field); color: var(--ink); border: 1px solid var(--line); padding: .3rem .8rem; border-radius: 999px; }
+.feedback button:disabled { cursor: default; opacity: .5; }
+.feedback button.picked { opacity: 1; border-color: var(--ink); font-weight: 500; }
+.go.share { padding: .5rem 1rem; font-size: .92rem; }
+.toast { min-height: 1.6em; font-size: .9rem; color: var(--ok); margin: .75rem 0 0; }
+
+.notice { background: var(--warn-bg); padding: 1rem 1.25rem; border-radius: 4px; }
+.notice p { margin: 0 0 .5rem; } .notice p:last-child { margin: 0; }
+.list { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .75rem; }
+.list button { font: inherit; cursor: pointer; background: var(--field); color: var(--ink); border: 1px solid var(--line); padding: .25rem .8rem; border-radius: 999px; }
+footer { margin-top: 3rem; font-size: .8rem; color: var(--muted); }
+footer p { margin: 0 0 .3rem; }
+
+/* ---------- 운영자 화면 ---------- */
+.admin main { max-width: 56rem; }
+.bar-top { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+.bar-top select, .login input { font: inherit; font-size: 1rem; }
+.login { max-width: 22rem; display: grid; gap: .75rem; }
+.login input { font-family: inherit; }
+.demo-badge { display: inline-block; background: var(--warn-bg); padding: .15rem .6rem; border-radius: 4px; font-size: .85rem; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .75rem; margin: 0 0 2rem; }
+.kpi { background: var(--field); border: 1px solid var(--line); border-radius: 6px; padding: .8rem 1rem; }
+.kpi .label { font-size: .82rem; color: var(--muted); margin: 0; }
+.kpi .num { font-size: 1.7rem; font-weight: 500; margin: .1rem 0 0; font-variant-numeric: tabular-nums; }
+.kpi .sub { font-size: .8rem; color: var(--muted); margin: 0; }
+.table-wrap { overflow-x: auto; margin-bottom: 2rem; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: .45rem .5rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 400; }
+td.num, th.num { text-align: right; }
+.bar { display: inline-block; height: .6rem; background: var(--accent); border-radius: 2px; vertical-align: middle; }
+.days { display: flex; align-items: flex-end; gap: 3px; height: 6rem; margin: 0 0 .3rem; }
+.days div { flex: 1; background: var(--ink); opacity: .75; border-radius: 2px 2px 0 0; min-height: 2px; }
+.days-axis { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: 2rem; }
+.muted { color: var(--muted); }
