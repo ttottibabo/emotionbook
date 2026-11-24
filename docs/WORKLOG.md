@@ -17,6 +17,7 @@
 - 테스트: 로직 35개, 화면 10개 통과 (TEST_REPORT)
 - 버그 수정: 과거형 감정 단어 누락 (D-006), 한국어 단어 중간 줄바꿈
 - 문서 작성: PRD(마케팅·운영 계획 포함), DECISION_LOG, SUCCESS_FAILURE_LOG, TEST_REPORT, AGENT_GUIDE
+- PRD를 PRD 템플릿 양식(12개 장: 개요, 문제(SWOT·3C·RICE), 해결 방안, 가설·지표, 기능·비기능·디자인 요구사항, 출시·운영, 일정, 승인, Q&A)에 맞춰 다시 작성
 
 **사용한 도구:** Claude Code (구현, 테스트, 문서 초안), 헤드리스 Chrome (테스트·스크린샷)
 
@@ -24,6 +25,7 @@
 - [ ] Firebase 프로젝트 만들기 → `js/firebase-config.js` 입력 → 보안 규칙 배포
 - [ ] Rules Playground로 보안 규칙 검증 (TEST_REPORT 4장)
 - [ ] 운영자 계정 만들고 `admins` 컬렉션에 등록
+- [ ] 설문 조사 진행 후 PRD 3.3.2 채우기
 - [ ] 지인 10명 베타 테스트 → 피드백 정리
 - [ ] 인스타 카드뉴스 12장 (감정별) 제작
 
