@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 # 이 사이트에서 온 요청만 받는다 (쉼표로 구분)
 ALLOWED_ORIGINS = "https://ttottibabo.github.io,http://localhost:5500,http://127.0.0.1:5500"
 # Firebase 프로젝트 ID (js/firebase-config.js의 projectId와 같게)
-FIREBASE_PROJECT_ID = ""
+FIREBASE_PROJECT_ID = "emotionbook-fcf08"
 # 사용할 Claude 모델. 무료 크레딧을 아끼려면 "claude-haiku-5-5"로 바꾼다.
 MODEL = "claude-opus-5-5"
 

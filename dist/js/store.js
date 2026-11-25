@@ -63,7 +63,8 @@ export async function loadPublished() {
   const h = await firebase();
   if (!h) return SEED_POSTS;
   try {
-    const snap = await h.fs.getDocs(h.fs.query(h.fs.collection(h.db, "posts"), h.fs.where("status", "==", "published")));
+    const timeout = new Promise((_, no) => setTimeout(() => no(new Error("8초 안에 응답 없음")), 8000));
+    const snap = await Promise.race([timeout, h.fs.getDocs(h.fs.query(h.fs.collection(h.db, "posts"), h.fs.where("status", "==", "published")))]);
     return [...snap.docs.map(toPost).sort((a, b) => b.createdMs - a.createdMs), ...SEED_POSTS];
   } catch (err) { console.warn("글 목록을 읽지 못했습니다", err); return SEED_POSTS; }
 }

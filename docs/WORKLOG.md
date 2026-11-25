@@ -23,7 +23,8 @@
 **사용한 도구:** Claude Code (기획 정리, 구현, 테스트, 문서), 헤드리스 Chrome (테스트·스크린샷)
 
 **다음 할 일**
-- [ ] Firebase 프로젝트 만들기 → `js/firebase-config.js` 입력 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록
+- [x] Firebase 프로젝트 만들기 (emotionbook-fcf08) → `js/firebase-config.js` 입력
+- [ ] Firestore 만들기 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록
 - [ ] Cloudflare Worker 배포 (`worker/README.md`) → `ANTHROPIC_API_KEY` Secret, `FIREBASE_PROJECT_ID` 설정 → `js/ai-config.js`에 주소 입력
 - [ ] AI 실제 호출 확인 (TEST_REPORT 4장) → K1~K3 결과 기록
 - [ ] 리뷰 6편 작성 (AI 3 / 직접 3) → 작성 시간 비교

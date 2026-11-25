@@ -3,6 +3,7 @@ import { DICT, EXAMPLES } from "./data.js";
 import { ruleMatch, byEmotion, postsFor, EMOTIONS } from "./recommend.js";
 import { logEvent, sendFeedback, loadPublished } from "./store.js";
 import { aiEnabled, aiRecommend } from "./ai.js";
+import { SEED_POSTS } from "./posts.js";
 import { esc, josa, paragraphs, fmtDate } from "./util.js";
 
 const $ = id => document.getElementById(id);
@@ -170,7 +171,16 @@ $("filters").querySelectorAll("button").forEach(b => b.addEventListener("click",
 $("home").addEventListener("click", e => { e.preventDefault(); go({}, null); });
 window.addEventListener("popstate", () => render(null));
 
-posts = await loadPublished();
+// 기본 글은 바로 보여 주고, 관리자가 발행한 글은 Firestore에서 도착하는 대로 덧붙인다 (Firebase가 느려도 화면이 멈추지 않게)
+posts = SEED_POSTS;
 renderList();
 render("link");
 document.body.dataset.ready = "1";
+loadPublished().then(list => {
+  if (list.length === posts.length) return;
+  posts = list;
+  renderList();
+  const id = new URLSearchParams(location.search).get("p");
+  if (id && !SEED_POSTS.some(p => p.id === id)) render("link");   // 새 글 링크로 들어온 경우 다시 그림
+  document.body.dataset.posts = String(list.length);
+});
