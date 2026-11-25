@@ -15,6 +15,7 @@
   --accent: #D9A54A; --field: #1B2A26; --ok: #7CC4A0; --no: #E38C78; --warn-bg: #3A2F1C; color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: inherit; }
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--ink);
   font-family: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere;
   padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
