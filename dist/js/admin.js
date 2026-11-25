@@ -324,7 +324,8 @@ async function start() {
   const h = await firebase();
   if (!h) { view.innerHTML = `<div class="notice"><p>Firebase에 연결하지 못했습니다. 네트워크를 확인해 주세요.</p></div>`; return; }
   const auth = await import(SDK + "firebase-auth.js");
-  const a = auth.getAuth(h.app);
+  // 이메일 로그인만 쓰므로 팝업·리디렉션 모듈 없이 초기화한다 (로딩이 빨라지고 헤드리스 브라우저에서도 동작)
+  const a = auth.initializeAuth(h.app, { persistence: [auth.indexedDBLocalPersistence, auth.browserLocalPersistence] });
   auth.onAuthStateChanged(a, async user => {
     if (!user) { $("who").textContent = ""; $("tabs").hidden = true; return showLogin(auth, a); }
     $("who").innerHTML = `${esc(user.email)} · <a href="#" id="logout">로그아웃</a>`;
