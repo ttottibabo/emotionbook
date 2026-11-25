@@ -1,51 +1,82 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head><meta charset="utf-8"><title>감정책 화면 테스트</title>
-<style>body{font:14px/1.6 "Malgun Gothic",sans-serif;margin:1.5rem;background:#fff;color:#111}.pass{color:#1a7f37}.fail{color:#c0392b;font-weight:bold}iframe{width:420px;height:700px;border:1px solid #ccc}</style></head>
+<style>body{font:14px/1.6 "Malgun Gothic",sans-serif;margin:1.5rem;background:#fff;color:#111}.pass{color:#1a7f37}.fail{color:#c0392b;font-weight:bold}iframe{width:420px;height:700px;border:1px solid #ccc;margin-right:8px}</style></head>
 <body>
-<h1 style="font-size:1.2rem">감정책 화면 테스트 (index.html을 실제로 조작)</h1>
+<h1 style="font-size:1.2rem">감정책 화면 테스트 (방문자·관리자 화면을 실제로 조작)</h1>
 <pre id="result">실행 중…</pre>
-<iframe id="app" src="../index.html"></iframe>
+<iframe id="app" src="../index.html"></iframe><iframe id="adm" src="../admin.html?demo=1"></iframe>
 <script>
 const rows = []; let pass = 0, fail = 0;
 const check = (id, name, ok, detail = "") => { ok ? pass++ : fail++; rows.push(`<span class="${ok ? "pass" : "fail"}">${ok ? "PASS" : "FAIL"}</span> ${id} ${name}${ok ? "" : " → " + detail}`); };
 const wait = ms => new Promise(r => setTimeout(r, ms));
+const loaded = el => new Promise(r => el.addEventListener("load", r, { once: true }));
+const ready = async d => { for (let i = 0; i < 50 && !d.body.dataset.ready && !d.querySelector(".tabs:not([hidden])"); i++) await wait(100); };
 
-document.getElementById("app").addEventListener("load", async () => {
+(async () => {
+  await Promise.all([loaded(document.getElementById("app")), loaded(document.getElementById("adm"))]);
+
+  /* ---------- 방문자 화면 ---------- */
   const w = document.getElementById("app").contentWindow, d = w.document;
-  await wait(800);
-  const submit = async text => { d.getElementById("q").value = text; d.getElementById("f").requestSubmit(); await wait(200); return d.getElementById("out"); };
+  await ready(d);
+  const submit = async text => { d.getElementById("q").value = text; d.getElementById("f").requestSubmit(); await wait(250); return d.getElementById("out"); };
 
-  check("U1", "예시 버튼 4개가 표시됨", d.querySelectorAll("#examples button").length === 4, d.querySelectorAll("#examples button").length);
+  check("U1", "예시 버튼 4개", d.querySelectorAll("#examples button").length === 4, d.querySelectorAll("#examples button").length);
+  check("U2", "글 목록에 기본 글 12편", d.querySelectorAll("#posts li a").length === 12, d.querySelectorAll("#posts li a").length);
+  [...d.querySelectorAll("#filters button")].find(b => b.dataset.f === "불안").click(); await wait(100);
+  check("U3", "‘불안’으로 거르면 1편, 버튼이 눌린 상태", d.querySelectorAll("#posts li a").length === 1 && d.querySelector('#filters [data-f="불안"]').getAttribute("aria-pressed") === "true");
+  d.querySelector('#filters [data-f="전체"]').click(); await wait(100);
 
   let out = await submit("발표 앞두고 불안해");
-  check("U2", "문장 입력 → 감정 ‘불안’과 책 3권", out.querySelector(".emo")?.textContent === "불안" && out.querySelectorAll("ol.books li").length === 3, out.textContent.slice(0, 60));
-  check("U3", "설명 문구의 조사가 맞음 (“불안”을 … 불안으로)", /“불안”을 찾아 불안으로 읽었습니다/.test(out.querySelector(".how p")?.textContent || ""), out.querySelector(".how p")?.textContent);
-
+  check("U4", "문장 입력 → 감정 ‘불안’과 맞는 글 카드", out.querySelector(".emo")?.textContent === "불안" && out.querySelector('[data-post="seed-02"]'), out.textContent.slice(0, 60));
+  check("U5", "설명 문구 조사 (“불안”을 … 불안으로)", /“불안”을 찾아 불안으로 읽었습니다/.test(out.querySelector(".how p")?.textContent || ""), out.querySelector(".how p")?.textContent);
   out.querySelector('[data-vote="up"]').click(); await wait(100);
-  check("U4", "👍 누르면 두 버튼이 잠기고 감사 문구 표시", [...out.querySelectorAll("[data-vote]")].every(b => b.disabled) && d.getElementById("toast").textContent.includes("고마워요"));
-
-  out = await submit("진짜 화났어");
-  check("U5", "‘분노’ 설명 조사 (분노로)", /분노로 읽었습니다/.test(out.querySelector(".how p")?.textContent || ""), out.querySelector(".how p")?.textContent);
+  check("U6", "👍 누르면 버튼 잠금, 감사 문구", [...out.querySelectorAll("[data-vote]")].every(b => b.disabled) && d.getElementById("toast").textContent.includes("고마워요"));
 
   out = await submit("오늘 날씨 맑음");
   const chips = out.querySelectorAll("[data-k]");
-  check("U6", "감정 못 찾으면 감정 12개 버튼 안내", chips.length === 12, chips.length);
+  check("U7", "감정 못 찾으면 감정 12개 버튼", chips.length === 12, chips.length);
   chips[4].click(); await wait(100);
-  check("U7", "감정 버튼 선택 → 그 감정의 책 3권", d.querySelectorAll("#out ol.books li").length === 3 && /직접 골랐습니다/.test(d.querySelector("#out .how p").textContent));
+  check("U8", "감정 버튼 → 그 감정의 글과 ‘직접 골랐습니다’", d.querySelector("#out .emo")?.textContent === "무기력" && /직접 골랐습니다/.test(d.querySelector("#out .how p").textContent));
 
   out = await submit("다 끝내고 싶다");
-  check("U8", "위기 표현 → 책 대신 109 안내, 추천 없음", out.querySelector(".crisis") && out.textContent.includes("109") && !out.querySelector("ol.books"));
-
+  check("U9", "위기 표현 → 109 안내, 추천 카드 없음", out.querySelector(".crisis") && out.textContent.includes("109") && !out.querySelector(".cards"));
   out = await submit("   ");
-  check("U9", "빈 입력은 아무것도 표시하지 않음", out.innerHTML === "");
-
+  check("U10", "빈 입력은 아무것도 표시하지 않음", out.innerHTML === "");
   out = await submit('<img src=x onerror="window.__xss=1">불안');
-  check("U10", "입력에 HTML을 넣어도 실행되지 않음", !w.__xss && !out.querySelector("img"));
+  check("U11", "입력에 HTML을 넣어도 실행되지 않음", !w.__xss && !out.querySelector("img"));
+
+  out = await submit("요즘 너무 지쳤어");
+  out.querySelector("[data-post]").click(); await wait(200);
+  const pv = d.getElementById("post-view");
+  check("U12", "카드를 누르면 글 보기: 제목, 본문, 책 3권, 주소 ?p=", !pv.hidden && d.getElementById("home-view").hidden && pv.querySelector("h1")?.textContent.includes("지쳤을") && pv.querySelectorAll("ol.books li").length === 3 && w.location.search === "?p=seed-06", w.location.search);
+  d.getElementById("back").click(); await wait(200);
+  check("U13", "‘모든 글’로 돌아오면 목록이 다시 보임", !d.getElementById("home-view").hidden && pv.hidden && w.location.search === "");
+
+  /* ---------- 관리자 화면 (예시 모드) ---------- */
+  const a = document.getElementById("adm").contentWindow.document;
+  await ready(a);
+  const $ = id => a.getElementById(id);
+  check("M1", "예시 모드 배지와 탭 3개", a.querySelector(".demo-badge") && a.querySelectorAll("#tabs button").length === 3);
+  $("assist").click(); await wait(100);
+  check("M2", "책 제목·메모 없이 누르면 안내", $("assist-note").textContent.includes("먼저 적어"), $("assist-note").textContent);
+  $("bookTitle").value = "월든"; $("bookAuthor").value = "헨리 데이비드 소로";
+  $("notes").value = "요즘 너무 지쳤다. 월든을 다시 펴니 천천히 사는 법이 보였다.\n\n하루에 한 가지만 하자고 마음먹었다.";
+  $("notes").dispatchEvent(new Event("input", { bubbles: true }));
+  $("assist").click(); await wait(200);
+  check("M3", "도우미가 제목·요약·감정·태그·설명·본문·카드를 채움", $("title").value && $("summary").value.startsWith("요즘") && $("emotion").value === "지침" && $("tags").value.includes("월든") && $("description").value && $("body").value.includes("\n\n") && $("card").value.includes("#감정책"), [$("title").value, $("emotion").value].join("|"));
+  a.getElementById("editor").requestSubmit(); await wait(200);
+  check("M4", "발행하면 저장 안내와 작성 시간 표시", /발행했습니다 · 작성 시간/.test($("save-note").textContent), $("save-note").textContent);
+  $("bookTitle").value = "모모"; $("summary").value = ""; $("title").value = "초안만"; a.getElementById("editor").requestSubmit(); await wait(100);
+  check("M5", "요약·감정·본문이 비면 발행 막음", $("save-note").textContent.includes("필요합니다"));
+  a.querySelector('[data-tab="list"]').click(); await wait(100);
+  check("M6", "글 목록 맨 위에 방금 발행한 글", a.querySelector("tbody tr td")?.textContent.includes("월든") && a.querySelector("tbody tr").textContent.includes("발행"), a.querySelector("tbody tr")?.textContent);
+  a.querySelector('[data-tab="stats"]').click(); await wait(100);
+  check("M7", "지표: 독자 5개 + 글쓰기 자동화 3개 + 방식 비교", a.querySelectorAll(".kpi").length === 8 && a.body.textContent.includes("추천 방식 비교") && a.body.textContent.includes("AI(Claude)"));
 
   rows.push("", `합계: 통과 ${pass} · 실패 ${fail}`);
   const el = document.getElementById("result"); el.innerHTML = rows.join("\n"); el.dataset.done = fail ? "fail" : "ok";
-});
+})();
 </script>
 </body>
 </html>

@@ -1,9 +1,9 @@
 rules_version = '2';
 
-// 감정책 Firestore 보안 규칙
-// - 누구나: 정해진 형태의 익명 기록(events)과 피드백(feedback)을 "추가"만 할 수 있다.
-// - 운영자(admins/{uid} 문서가 있는 로그인 사용자)만: 기록을 "읽을" 수 있다.
-// - 누구도: 기록을 고치거나 지울 수 없다. 운영자 지정은 Firebase 콘솔에서만 한다.
+// 감정책 블로그 Firestore 보안 규칙
+// - 누구나: 발행된 글(posts, status == "published")을 읽고, 정해진 형태의 익명 기록(events)과 피드백(feedback)을 "추가"만 한다.
+// - 관리자(admins/{uid} 문서가 있는 로그인 사용자)만: 글을 쓰고 고치고 지우며, 초안과 기록을 읽는다.
+// - 누구도: 기록을 고치거나 지울 수 없다. 관리자 지정은 Firebase 콘솔에서만 한다.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -12,15 +12,39 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
     function shortOrNull(v, n) { return v == null || (v is string && v.size() <= n); }
+    function oneOfOrNull(v, list) { return v == null || v in list; }
     function validSid(d) { return d.sid is string && d.sid.size() <= 20; }
+    function str(v, n) { return v is string && v.size() <= n; }
+
+    match /posts/{id} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow create, update: if isAdmin() && validPost(request.resource.data);
+      allow delete: if isAdmin();
+
+      function validPost(d) {
+        return d.keys().hasOnly(['title', 'summary', 'emotion', 'tags', 'description', 'card', 'body',
+                                 'bookTitle', 'bookAuthor', 'status', 'aiUsed', 'editSeconds', 'createdAt', 'updatedAt'])
+          && str(d.title, 60) && d.title.size() > 0
+          && str(d.summary, 120) && str(d.emotion, 10) && str(d.description, 90)
+          && str(d.card, 400) && str(d.body, 6000)
+          && str(d.bookTitle, 60) && str(d.bookAuthor, 40)
+          && d.tags is list && d.tags.size() <= 6
+          && d.status in ['draft', 'published']
+          && d.aiUsed is bool
+          && d.editSeconds is int && d.editSeconds >= 0
+          && d.updatedAt == request.time;
+      }
+    }
 
     match /events/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['type', 'emotion', 'word', 'source', 'sid', 'ts'])
-        && request.resource.data.keys().hasAll(['type', 'emotion', 'word', 'source', 'sid', 'ts'])
-        && request.resource.data.type in ['recommend', 'miss', 'crisis', 'share']
+      allow create: if request.resource.data.keys().hasOnly(['type', 'emotion', 'word', 'source', 'method', 'post', 'sid', 'ts'])
+        && request.resource.data.keys().hasAll(['type', 'emotion', 'word', 'source', 'method', 'post', 'sid', 'ts'])
+        && request.resource.data.type in ['recommend', 'miss', 'crisis', 'share', 'view']
         && shortOrNull(request.resource.data.emotion, 10)
         && shortOrNull(request.resource.data.word, 10)
-        && (request.resource.data.source == null || request.resource.data.source in ['input', 'chip', 'link'])
+        && oneOfOrNull(request.resource.data.source, ['input', 'chip', 'link', 'list'])
+        && oneOfOrNull(request.resource.data.method, ['rule', 'ai'])
+        && shortOrNull(request.resource.data.post, 40)
         && validSid(request.resource.data)
         && request.resource.data.ts == request.time;
       allow read: if isAdmin();
@@ -28,16 +52,18 @@ service cloud.firestore {
     }
 
     match /feedback/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['emotion', 'vote', 'sid', 'ts'])
-        && request.resource.data.keys().hasAll(['emotion', 'vote', 'sid', 'ts'])
-        && request.resource.data.emotion is string && request.resource.data.emotion.size() <= 10
+      allow create: if request.resource.data.keys().hasOnly(['emotion', 'vote', 'method', 'sid', 'ts'])
+        && request.resource.data.keys().hasAll(['emotion', 'vote', 'method', 'sid', 'ts'])
+        && str(request.resource.data.emotion, 10)
         && request.resource.data.vote in ['up', 'down']
+        && oneOfOrNull(request.resource.data.method, ['rule', 'ai'])
         && validSid(request.resource.data)
         && request.resource.data.ts == request.time;
       allow read: if isAdmin();
       allow update, delete: if false;
     }
 
+    // 본인 문서만 읽을 수 있다. AI 중계 서버도 이 규칙으로 관리자인지 확인한다.
     match /admins/{uid} {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;

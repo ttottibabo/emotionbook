@@ -4,18 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>감정책 운영</title>
+<title>감정책 관리자</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body class="admin">
+<header class="site">
+  <a class="brand" href="./">📖 감정책</a>
+  <span class="muted">관리자</span>
+  <span id="who" class="who muted"></span>
+</header>
 <main>
-  <div class="bar-top">
-    <h1>감정책 운영</h1>
-    <div id="who" class="muted"></div>
-  </div>
+  <nav class="tabs" id="tabs" hidden aria-label="관리자 메뉴">
+    <button type="button" data-tab="write">글쓰기</button>
+    <button type="button" data-tab="list">글 목록</button>
+    <button type="button" data-tab="stats">지표</button>
+  </nav>
   <div id="view"><p class="muted">불러오는 중…</p></div>
 </main>
 <script type="module" src="js/admin.js"></script>

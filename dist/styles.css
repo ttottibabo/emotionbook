@@ -85,3 +85,45 @@ td.num, th.num { text-align: right; }
 .days div { flex: 1; background: var(--ink); opacity: .75; border-radius: 2px 2px 0 0; min-height: 2px; }
 .days-axis { display: flex; justify-content: space-between; font-size: .78rem; color: var(--muted); margin-bottom: 2rem; }
 .muted { color: var(--muted); }
+
+/* ---------- 블로그 공통 ---------- */
+header.site { max-width: 56rem; margin: 0 auto; padding: 1rem 1rem 0; display: flex; flex-wrap: wrap; gap: .25rem .9rem; align-items: baseline; }
+.brand { font-family: "Gowun Batang", serif; font-weight: 700; font-size: 1.25rem; text-decoration: none; }
+.who { margin-left: auto; font-size: .9rem; }
+section.all { margin-top: 3.5rem; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+ul.cards { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: .75rem; }
+ul.cards a { display: grid; gap: .2rem; text-decoration: none; padding: 1rem 1.1rem; background: var(--field); border: 1px solid var(--line); border-radius: 6px; }
+ul.cards a:hover, ul.cards a:focus-visible { border-color: var(--ink); }
+ul.cards a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+ul.cards .title { font-size: 1.15rem; }
+ul.cards .why { color: var(--ink); }
+ul.cards .date { font-size: .8rem; color: var(--muted); }
+.chip { justify-self: start; display: inline-block; font-size: .78rem; color: var(--accent); border: 1px solid currentColor; border-radius: 999px; padding: 0 .55rem; }
+.ai-msg { font-family: "Gowun Batang", serif; font-size: 1.1rem; margin: 0 0 .5rem; }
+
+/* 글 보기 */
+.post h1 { margin-top: .5rem; }
+.post .meta { display: flex; gap: .6rem; align-items: center; color: var(--muted); font-size: .9rem; margin: 1.5rem 0 0; }
+.post .body { font-size: 1.05rem; margin: 1.5rem 0 2rem; }
+.post .body p { margin: 0 0 1rem; }
+.post h2 { margin-top: 2rem; }
+.tags { color: var(--muted); font-size: .9rem; margin: 1.25rem 0 0; }
+
+/* ---------- 관리자: 탭과 글쓰기 ---------- */
+.tabs { display: flex; gap: .25rem; border-bottom: 1px solid var(--line); margin: 0 0 1.75rem; overflow-x: auto; }
+.tabs button { font: inherit; cursor: pointer; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); padding: .6rem 1rem; }
+.tabs button[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 500; }
+.editor { display: grid; gap: 1.25rem; }
+.editor fieldset { border: 1px solid var(--line); border-radius: 6px; padding: 1rem 1.1rem 1.2rem; margin: 0; display: grid; gap: .9rem; min-width: 0; }
+.editor legend { font-weight: 500; padding: 0 .4rem; }
+.editor label { display: grid; gap: .3rem; font-size: .92rem; }
+.editor input, .editor select, .editor textarea { font: inherit; font-size: 1rem; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 4px; padding: .5rem .65rem; width: 100%; }
+.editor textarea { resize: vertical; line-height: 1.6; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .9rem; }
+.assist-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.ghost { font: inherit; cursor: pointer; background: none; color: var(--ink); border: 1px solid var(--ink); padding: .65rem 1.1rem; border-radius: 4px; justify-self: start; }
+.row-actions { display: flex; gap: .3rem; }
+.row-actions button { font: inherit; font-size: .85rem; cursor: pointer; background: var(--field); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: .15rem .5rem; }
+td.wrap { white-space: normal; min-width: 12rem; }
+ul.plain { padding-left: 1.1rem; color: var(--muted); font-size: .92rem; }
