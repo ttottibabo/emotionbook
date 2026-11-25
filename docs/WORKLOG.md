@@ -34,7 +34,7 @@
 - [x] Vercel 배포 (emotionbook-server.vercel.app) → `ANTHROPIC_API_KEY` 입력 → `js/ai-config.js` 연결
 - [x] AI 실제 호출 확인: K1~K3 모두 AI가 해결 (TEST_REPORT v2.3)
 
-- [x] 결과보고서 PDF 작성 (docs/RESULT_REPORT.pdf, 6쪽)
+- [x] 결과보고서 PDF 작성 (docs/RESULT_REPORT.pdf, 2쪽)
 - [ ] 리뷰 6편 작성 (AI 3 / 직접 3) → 작성 시간 비교
 - [ ] 설문 진행 후 PRD 3.3.2 채우기, 지인 10명 베타
 

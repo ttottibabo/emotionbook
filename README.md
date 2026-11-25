@@ -11,7 +11,7 @@
 | 배포된 블로그 | https://ttottibabo.github.io/emotionbook/ |
 | PRD 기획서 (2쪽) | [docs/PRD.md](docs/PRD.md) |
 | 테스트 보고서 (2쪽) | [docs/TEST_REPORT.md](docs/TEST_REPORT.md) |
-| **결과보고서 (PDF, 6쪽)** | [docs/RESULT_REPORT.pdf](docs/RESULT_REPORT.pdf) · 원본 [docs/report/result_report.html](docs/report/result_report.html) |
+| **결과보고서 (PDF, 2쪽)** | [docs/RESULT_REPORT.pdf](docs/RESULT_REPORT.pdf) · 원본 [docs/report/result_report.html](docs/report/result_report.html) |
 | 에이전트용 지침 | [docs/AGENT_GUIDE.md](docs/AGENT_GUIDE.md) |
 | 성공·실패 로그 / 의사결정 로그 | [docs/SUCCESS_FAILURE_LOG.md](docs/SUCCESS_FAILURE_LOG.md) · [docs/DECISION_LOG.md](docs/DECISION_LOG.md) |
 | 작업 일지 / 커밋 기록 | [docs/WORKLOG.md](docs/WORKLOG.md) · [커밋 목록](https://github.com/ttottibabo/emotionbook/commits/main) |
