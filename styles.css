@@ -124,7 +124,7 @@ ul.cards .date { font-size: .8rem; color: var(--muted); }
 .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .9rem; }
 .assist-row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
 .ghost { font: inherit; cursor: pointer; background: none; color: var(--ink); border: 1px solid var(--ink); padding: .65rem 1.1rem; border-radius: 4px; justify-self: start; }
-.row-actions { display: flex; gap: .3rem; }
+.row-actions { display: flex; flex-wrap: wrap; gap: .3rem; white-space: normal; min-width: 7.5rem; }
 .row-actions button { font: inherit; font-size: .85rem; cursor: pointer; background: var(--field); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: .15rem .5rem; }
-td.wrap { white-space: normal; min-width: 12rem; }
+td.wrap { white-space: normal; min-width: 9rem; }
 ul.plain { padding-left: 1.1rem; color: var(--muted); font-size: .92rem; }

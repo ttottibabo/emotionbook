@@ -29,7 +29,7 @@
 **다음 할 일**
 - [x] Firebase 프로젝트 만들기 (emotionbook-fcf08) → `js/firebase-config.js` 입력
 - [x] Firestore 만들기 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록 (보안 규칙 6개 시나리오 확인)
-- [ ] 관리자로 로그인해 첫 글 발행, 로그인·실제 관리자 화면 캡처
+- [x] 관리자로 로그인해 AI 도우미로 첫 글 발행 (작성 53초, 블로그에 표시 확인)
 - [x] AI 중계 서버를 Vercel용으로 변경 (`server/`, D-014), 서버 테스트 13개 통과
 - [x] Vercel 배포 (emotionbook-server.vercel.app) → `ANTHROPIC_API_KEY` 입력 → `js/ai-config.js` 연결
 - [x] AI 실제 호출 확인: K1~K3 모두 AI가 해결 (TEST_REPORT v2.3)
