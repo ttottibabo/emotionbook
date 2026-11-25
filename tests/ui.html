@@ -19,7 +19,8 @@ const ready = async d => { for (let i = 0; i < 50 && !d.body.dataset.ready && !d
   /* ---------- 방문자 화면 ---------- */
   const w = document.getElementById("app").contentWindow, d = w.document;
   await ready(d);
-  const submit = async text => { d.getElementById("q").value = text; d.getElementById("f").requestSubmit(); await wait(250); return d.getElementById("out"); };
+  // AI가 연결되어 있으면 응답(또는 실패 후 규칙 방식)을 기다린다
+  const submit = async text => { d.getElementById("q").value = text; d.getElementById("f").requestSubmit(); await wait(250); for (let i = 0; i < 250 && d.getElementById("go").disabled; i++) await wait(100); return d.getElementById("out"); };
 
   check("U1", "예시 버튼 4개", d.querySelectorAll("#examples button").length === 4, d.querySelectorAll("#examples button").length);
   check("U2", "글 목록에 기본 글 12편", d.querySelectorAll("#posts li a").length === 12, d.querySelectorAll("#posts li a").length);

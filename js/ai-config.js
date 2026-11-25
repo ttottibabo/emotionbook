@@ -2,4 +2,4 @@
 // 예: "https://emotionbook-xxxx.vercel.app/api"
 // 비어 있으면 AI 없이 규칙 방식으로만 동작한다.
 // Claude API 키는 여기에 절대 넣지 않는다. 키는 Vercel 환경 변수(ANTHROPIC_API_KEY)에만 둔다.
-export const AI_ENDPOINT = "";
+export const AI_ENDPOINT = "https://emotionbook-server.vercel.app/api";
