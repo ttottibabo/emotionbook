@@ -30,7 +30,8 @@
 - [x] Firebase 프로젝트 만들기 (emotionbook-fcf08) → `js/firebase-config.js` 입력
 - [x] Firestore 만들기 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록 (보안 규칙 6개 시나리오 확인)
 - [ ] 관리자로 로그인해 첫 글 발행, 로그인·실제 관리자 화면 캡처
-- [ ] Cloudflare Worker 배포 (`worker/README.md`) → `ANTHROPIC_API_KEY` Secret, `FIREBASE_PROJECT_ID` 설정 → `js/ai-config.js`에 주소 입력
+- [x] AI 중계 서버를 Vercel용으로 변경 (`server/`, D-014), 서버 테스트 13개 통과
+- [ ] Vercel 배포 (`server/README.md`, GitHub 로그인) → `ANTHROPIC_API_KEY` 입력 → `js/ai-config.js`에 주소/api 입력
 - [ ] AI 실제 호출 확인 (TEST_REPORT 4장) → K1~K3 결과 기록
 - [ ] 리뷰 6편 작성 (AI 3 / 직접 3) → 작성 시간 비교
 - [ ] 설문 진행 후 PRD 3.3.2 채우기, 지인 10명 베타

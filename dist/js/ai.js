@@ -1,4 +1,4 @@
-// Claude AI 호출 (브라우저 → Cloudflare Worker → Claude). 키는 Worker에만 있다.
+// Claude AI 호출 (브라우저 → Vercel 중계 서버 → Claude). 키는 중계 서버에만 있다.
 import { AI_ENDPOINT } from "./ai-config.js";
 import { catalog, sanitizeRecommend, sanitizeAssist } from "./recommend.js";
 

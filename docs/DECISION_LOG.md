@@ -93,3 +93,11 @@
 - 날짜: 2026-11-25 · 상태: **채택**
 - 결정: 기본 `claude-opus-5-5`. 독자 추천은 effort `low`, 관리자 도우미는 `medium`. 응답은 JSON Schema로 고정하고, 안전 분류기가 거절하면 서버 측 fallback으로 다른 모델이 이어받는다.
 - 이유: 한국어 문장의 미묘한 감정과 운영자 말투 유지에는 성능이 높은 모델이 낫다. 비용이 문제가 되면 `wrangler.toml`의 `MODEL`만 `claude-haiku-5-5`로 바꾸면 된다 (코드 수정 없음).
+
+## D-014 · AI 중계 서버를 Cloudflare Workers에서 Vercel Functions로 변경 (D-008 개정)
+- 날짜: 2026-11-25 · 상태: **채택**
+- 배경: Cloudflare는 새로 이메일 가입이 필요했다. 운영자(나)가 새 계정을 만들지 않고 진행하길 원했다.
+- 고려한 안: ① Cloudflare Workers (이메일 가입) ② Vercel Functions (기존 GitHub 계정으로 로그인) ③ 서버 없이 관리자 브라우저에만 키 저장 (독자 AI 불가)
+- 결정: ②. `worker/`를 `server/`로 옮기고, 공통 로직(`server/lib/core.js`)과 진입점(`server/api/*.js`)으로 나눴다.
+- 이유: 새 계정 없이 GitHub 로그인만으로 배포할 수 있고, 독자 AI와 관리자 AI를 모두 유지한다. 비밀이 아닌 설정(허용 사이트, Firebase 프로젝트 ID, 모델)은 코드 기본값으로 두어, 운영자는 API 키 하나만 넣으면 된다.
+- 대가: Vercel에는 Cloudflare 같은 요청 제한 기능이 기본으로 없어, 서버 인스턴스마다 세는 간단한 제한(IP당 1분 10회)으로 대신했다. 크레딧 사용량은 Anthropic 콘솔에서 주 1회 확인한다.
