@@ -5,6 +5,17 @@
 
 감정 기반 책 블로그에 Claude AI 기능 두 가지를 넣어, 블로그 운영자(나)의 발행 과정과 독자의 글 찾기를 자동화한 프로젝트입니다.
 
+## 📌 제출물 바로가기
+| 항목 | 링크 |
+|---|---|
+| 배포된 블로그 | https://ttottibabo.github.io/emotionbook/ |
+| PRD 기획서 (2쪽) | [docs/PRD.md](docs/PRD.md) |
+| 테스트 보고서 (2쪽) | [docs/TEST_REPORT.md](docs/TEST_REPORT.md) |
+| 에이전트용 지침 | [docs/AGENT_GUIDE.md](docs/AGENT_GUIDE.md) |
+| 성공·실패 로그 / 의사결정 로그 | [docs/SUCCESS_FAILURE_LOG.md](docs/SUCCESS_FAILURE_LOG.md) · [docs/DECISION_LOG.md](docs/DECISION_LOG.md) |
+| 작업 일지 / 커밋 기록 | [docs/WORKLOG.md](docs/WORKLOG.md) · [커밋 목록](https://github.com/ttottibabo/emotionbook/commits/main) |
+| 소스코드 | 방문자 `index.html` · 관리자 `admin.html` · `js/` · AI 중계 서버 `worker/` · `firestore.rules` |
+
 - 👉 **방문자 페이지:** https://ttottibabo.github.io/emotionbook/
 - 🔧 **관리자 페이지:** https://ttottibabo.github.io/emotionbook/admin.html · [예시 데이터로 둘러보기](https://ttottibabo.github.io/emotionbook/admin.html?demo=1)
 

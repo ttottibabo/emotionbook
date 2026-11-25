@@ -20,11 +20,16 @@
 - 테스트: 로직 55개, 화면 20개 통과 (가짜 AI 서버 포함)
 - PRD v2.0 재작성, DECISION_LOG D-008~D-013, TEST_REPORT, 스크린샷 11장
 
+- 제출 양식에 맞춰 PRD·테스트 보고서를 2쪽으로 압축 (v2.1), README 맨 위에 제출물 바로가기
+- Firebase 연결 (emotionbook-fcf08), 배포 사이트에서 보안 규칙 6개 시나리오 확인
+- 버그 수정: 로그인 전 관리자 탭 노출, Firebase 응답 대기로 첫 화면 지연
+
 **사용한 도구:** Claude Code (기획 정리, 구현, 테스트, 문서), 헤드리스 Chrome (테스트·스크린샷)
 
 **다음 할 일**
 - [x] Firebase 프로젝트 만들기 (emotionbook-fcf08) → `js/firebase-config.js` 입력
-- [ ] Firestore 만들기 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록
+- [x] Firestore 만들기 → 보안 규칙 게시 → 관리자 계정 + `admins` 등록 (보안 규칙 6개 시나리오 확인)
+- [ ] 관리자로 로그인해 첫 글 발행, 로그인·실제 관리자 화면 캡처
 - [ ] Cloudflare Worker 배포 (`worker/README.md`) → `ANTHROPIC_API_KEY` Secret, `FIREBASE_PROJECT_ID` 설정 → `js/ai-config.js`에 주소 입력
 - [ ] AI 실제 호출 확인 (TEST_REPORT 4장) → K1~K3 결과 기록
 - [ ] 리뷰 6편 작성 (AI 3 / 직접 3) → 작성 시간 비교
